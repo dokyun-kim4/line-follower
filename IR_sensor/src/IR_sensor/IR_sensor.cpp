@@ -12,6 +12,9 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *motorL = AFMS.getMotor(4);
 Adafruit_DCMotor *motorR = AFMS.getMotor(3);
 
+// Car direction (1 for CW, -1 for CCW)
+const int direction = 1;
+
 // Define pins
 const int IR_L_READ = A2;
 const int IR_M_READ = A1;
@@ -21,11 +24,13 @@ const int IR_L_OUT = 5;
 const int IR_M_OUT = 4;
 const int IR_R_OUT = 3;
 
-const int speed = 25;
-const int turnspeed = 60;
+// Other constants
+const int linspeed = 25;
+const int turnspeed_default = 30;
+const int min_diff = 200;
 
 // Define threshold value for black tape reading
-int THRESHOLD = 700; // if over 700, then on black tape
+int THRESHOLD = 500; // if over 600, then on black tape
 
 int getReading(int D_pin, int A_pin)
 {
@@ -43,33 +48,27 @@ int getReading(int D_pin, int A_pin)
   return value;
 }
 
-void goLeftInPlace()
+void goLeftInPlace(int speed)
 {
   motorL->run(BACKWARD);
   motorR->run(FORWARD);
-  motorL->setSpeed(0);
-  motorR->setSpeed(0);
-  delay(5);
-  motorL->setSpeed(turnspeed);
-  motorR->setSpeed(turnspeed);
+  motorL->setSpeed(speed);
+  motorR->setSpeed(speed);
 }
 
-void goRightInPlace()
+void goRightInPlace(int speed)
 {
   motorR->run(BACKWARD);
   motorL->run(FORWARD);
-  motorL->setSpeed(0);
-  motorR->setSpeed(0);
-  delay(5);
-  motorL->setSpeed(turnspeed);
-  motorR->setSpeed(turnspeed);
+  motorL->setSpeed(speed);
+  motorR->setSpeed(speed);
 }
 
 void goLeft()
 {
   motorR->run(FORWARD);
 
-  motorR->setSpeed(turnspeed);
+  motorR->setSpeed(turnspeed_default);
   motorL->setSpeed(0);
 }
 
@@ -77,7 +76,7 @@ void goRight()
 {
   motorL->run(FORWARD);
 
-  motorL->setSpeed(turnspeed);
+  motorL->setSpeed(turnspeed_default);
   motorR->setSpeed(0);
 }
 
@@ -86,46 +85,38 @@ void goStraight()
   motorL->run(FORWARD);
   motorR->run(FORWARD);
 
-  motorL->setSpeed(speed);
-  motorR->setSpeed(speed);
+  motorL->setSpeed(linspeed);
+  motorR->setSpeed(linspeed);
 }
 
 void decideDirection(int IR_L, int IR_M, int IR_R)
 {
-  if (IR_M >= THRESHOLD)
+
+  if ((IR_M > IR_L) & (IR_M > IR_R))
   {
-    if (IR_L >= THRESHOLD & IR_R < THRESHOLD)
+    goStraight();
+  }
+  else if ((IR_L > IR_R))
+  {
+    delay(50);
+    goLeftInPlace(turnspeed_default);
+  }
+  else if ((IR_R > IR_L))
+  {
+    delay(50);
+    goRightInPlace(turnspeed_default);
+  }
+  else
+  {
+    if (direction == 1)
     {
-      goLeftInPlace();
-      Serial.println("left in place");
-    }
-    else if (IR_R >= THRESHOLD & IR_L < THRESHOLD)
-    {
-      goRightInPlace();
-      Serial.println("right in place");
+      goRightInPlace(50);
     }
     else
     {
-      goStraight();
-      Serial.println("straight");
+      goLeftInPlace(50);
     }
-  }
-  else if (IR_L >= THRESHOLD & IR_R < THRESHOLD)
-  {
-    goLeft();
-    Serial.println("left");
-  }
-
-  else if (IR_R >= THRESHOLD & IR_L < THRESHOLD)
-  {
-    goRight();
-    Serial.println("right");
-  }
-
-  else
-  {
-    goStraight();
-    Serial.println("straight");
+    delay(100);
   }
 }
 
