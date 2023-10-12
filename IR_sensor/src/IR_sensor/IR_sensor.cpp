@@ -15,6 +15,9 @@ Adafruit_DCMotor *motorR = AFMS.getMotor(3);
 // Store direction
 int direction = 0;
 
+// Data output
+String data = "";
+
 // Define pins
 const int IR_L_READ = A2;
 const int IR_M_READ = A1;
@@ -77,26 +80,45 @@ void decideDirection(int IR_L, int IR_M, int IR_R, int direction)
 {
   if ((IR_M > IR_L) & (IR_M > IR_R))
   {
+    data += String(linspeed);
+    data += ",";
+    data += String(linspeed);
+    data += ",";
     goStraight();
   }
   else if ((IR_L > IR_R))
   {
     delay(50);
-    goLeftInPlace(turnspeed_default);
+    data += String(-turnspeed_default);
+    data += ",";
+    data += String(turnspeed_default);
+    data += ",";
   }
   else if ((IR_R > IR_L))
   {
     delay(50);
+    data += String(turnspeed_default);
+    data += ",";
+    data += String(-turnspeed_default);
+    data += ",";
     goRightInPlace(turnspeed_default);
   }
   else
   {
     if (direction == 1)
     {
+      data += String(turnspeed_default);
+      data += ",";
+      data += String(-turnspeed_default);
+      data += ",";
       goRightInPlace(turnspeed_default);
     }
     else
     {
+      data += String(-turnspeed_default);
+      data += ",";
+      data += String(turnspeed_default);
+      data += ",";
       goLeftInPlace(turnspeed_default);
     }
     delay(100);
@@ -160,6 +182,7 @@ void inputSpeed()
 
 void loop()
 {
+  data = "";
   if (Serial.available() > 0)
   {
     inputSpeed();
@@ -175,5 +198,7 @@ void loop()
   // Serial.print("Right: ");
   // Serial.println(IR_R_value);
   decideDirection(IR_L_value, IR_M_value, IR_R_value, direction);
+  data += String(IR_L_value) + "," + String(IR_M_value) + "," + String(IR_R_value);
   delay(50);
+  Serial.println(data);
 }
