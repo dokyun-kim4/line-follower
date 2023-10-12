@@ -22,12 +22,13 @@ const int IR_M_OUT = 4;
 const int IR_R_OUT = 3;
 
 const int speed = 25;
-const int turnspeed = 40;
+const int turnspeed = 60;
 
 // Define threshold value for black tape reading
 int THRESHOLD = 700; // if over 700, then on black tape
 
-int getReading(int D_pin, int A_pin) {
+int getReading(int D_pin, int A_pin)
+{
   // IR LED on
   digitalWrite(D_pin, HIGH);
   // Read phototransistor voltage
@@ -40,88 +41,103 @@ int getReading(int D_pin, int A_pin) {
 
   int value = v_on - v_off;
   return value;
- }
+}
 
-void goLeftInPlace() {
-    motorL->run(BACKWARD);
-    motorR->run(FORWARD);
-    motorL->setSpeed(0);
-    motorR->setSpeed(0);
-    delay(5);
-    motorL->setSpeed(turnspeed);
-    motorR->setSpeed(turnspeed);
- }
+void goLeftInPlace()
+{
+  motorL->run(BACKWARD);
+  motorR->run(FORWARD);
+  motorL->setSpeed(0);
+  motorR->setSpeed(0);
+  delay(5);
+  motorL->setSpeed(turnspeed);
+  motorR->setSpeed(turnspeed);
+}
 
-void goRightInPlace() {
-    motorR->run(BACKWARD);
-    motorL->run(FORWARD);
-    motorL->setSpeed(0);
-    motorR->setSpeed(0);
-    delay(5);
-    motorL->setSpeed(turnspeed);
-    motorR->setSpeed(turnspeed);
- }
+void goRightInPlace()
+{
+  motorR->run(BACKWARD);
+  motorL->run(FORWARD);
+  motorL->setSpeed(0);
+  motorR->setSpeed(0);
+  delay(5);
+  motorL->setSpeed(turnspeed);
+  motorR->setSpeed(turnspeed);
+}
 
-void goLeft() {
+void goLeft()
+{
   motorR->run(FORWARD);
 
   motorR->setSpeed(turnspeed);
   motorL->setSpeed(0);
 }
 
-void goRight() {
+void goRight()
+{
   motorL->run(FORWARD);
 
   motorL->setSpeed(turnspeed);
   motorR->setSpeed(0);
 }
 
-void goStraight() {
+void goStraight()
+{
   motorL->run(FORWARD);
   motorR->run(FORWARD);
 
   motorL->setSpeed(speed);
   motorR->setSpeed(speed);
- }
+}
 
-void decideDirection(int IR_L, int IR_M, int IR_R) {
-  if (IR_M >= THRESHOLD) {
-    if (IR_L >= THRESHOLD & IR_R < THRESHOLD) {
+void decideDirection(int IR_L, int IR_M, int IR_R)
+{
+  if (IR_M >= THRESHOLD)
+  {
+    if (IR_L >= THRESHOLD & IR_R < THRESHOLD)
+    {
       goLeftInPlace();
       Serial.println("left in place");
     }
-    else if(IR_R >= THRESHOLD & IR_L < THRESHOLD) {
+    else if (IR_R >= THRESHOLD & IR_L < THRESHOLD)
+    {
       goRightInPlace();
       Serial.println("right in place");
     }
-    else {
+    else
+    {
       goStraight();
       Serial.println("straight");
     }
   }
-  else if (IR_L >=THRESHOLD & IR_R < THRESHOLD) {
+  else if (IR_L >= THRESHOLD & IR_R < THRESHOLD)
+  {
     goLeft();
     Serial.println("left");
   }
 
-  else if (IR_R >=THRESHOLD & IR_L < THRESHOLD) {
+  else if (IR_R >= THRESHOLD & IR_L < THRESHOLD)
+  {
     goRight();
     Serial.println("right");
   }
 
-  else {
+  else
+  {
     goStraight();
     Serial.println("straight");
   }
-  
 }
 
-void setup() {
-  Serial.begin(9600);           // set up Serial library at 9600 bps
+void setup()
+{
+  Serial.begin(9600); // set up Serial library at 9600 bps
 
-  if (!AFMS.begin()) {
+  if (!AFMS.begin())
+  {
     Serial.println("Could not find Motor Shield. Check wiring.");
-    while (1);
+    while (1)
+      ;
   }
   Serial.println("Motor Shield found.");
 
@@ -141,7 +157,8 @@ void setup() {
   pinMode(IR_R_OUT, OUTPUT);
 }
 
-void loop() {
+void loop()
+{
   int IR_L_value = getReading(IR_L_OUT, IR_L_READ);
   int IR_M_value = getReading(IR_M_OUT, IR_M_READ);
   int IR_R_value = getReading(IR_R_OUT, IR_R_READ);
