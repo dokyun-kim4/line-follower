@@ -93,6 +93,7 @@ void decideDirection(int IR_L, int IR_M, int IR_R, int direction)
     data += ",";
     data += String(turnspeed_default);
     data += ",";
+    goLeftInPlace(turnspeed_default);
   }
   else if ((IR_R > IR_L))
   {
